@@ -1,0 +1,38 @@
+# Map catalog. Missing hospital floors are listed so selection fails closed.
+# Candidate Pinky maps are files that exist. They are not surveyed hospital maps.
+maps:
+  gazebo_test_room:
+    floor_id: test_room
+    version: 1
+    method: hand_aligned_boxes
+    verification: gazebo_nav2_goal
+    active_master: false
+    yaml: sim/nav2/map/pinky1_room.yaml
+  pinky_my_map:
+    floor_id: unknown
+    version: 1
+    method: pinky_slam_export
+    verification: present_unsurveyed
+    active_master: false
+    yaml: /home/sw/DevSpace/pinky/src/pinky_pro/pinky_navigation/map/my_map.yaml
+  pinky_lab:
+    floor_id: unknown
+    version: 1
+    method: pinky_slam_export
+    verification: present_unsurveyed
+    active_master: false
+    yaml: /home/sw/DevSpace/pinky/src/pinky_pro/pinky_navigation/map/pinklab.yaml
+  floor_1:
+    floor_id: "1"
+    version: null
+    method: null
+    verification: missing
+    active_master: false
+    yaml: null
+  floor_7:
+    floor_id: "7"
+    version: null
+    method: null
+    verification: missing
+    active_master: false
+    yaml: null

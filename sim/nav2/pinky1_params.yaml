@@ -1,4 +1,5 @@
-# Prepared for a future virtual pinky1. Not verified against a live scan.
+# Incomplete stub kept for the earlier Isaac notes.
+# The Gazebo Nav2 run uses sim/nav2/pinky1_gazebo.yaml.
 # cmd_vel matches the Pinky Nav2 config and the Isaac Sim 6 Twist subscriber:
 # geometry_msgs/msg/Twist, enable_stamped_cmd_vel false.
 bt_navigator:

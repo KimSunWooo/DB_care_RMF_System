@@ -1,0 +1,51 @@
+# Robot profiles for care_move. ROBOT_BACKEND selects gazebo or hardware.
+# This file does not approve motion and does not set a robot IP address.
+# Hardware serial ports are the defaults in the Pinky bringup source.
+robots:
+  pinky1:
+    enabled: true
+    label: Pinky #1
+  pinky2:
+    enabled: false
+    label: Pinky #2
+  pinky3:
+    enabled: false
+    label: Pinky #3
+
+backends:
+  gazebo:
+    ros_domain_id: 42
+    use_sim_time: true
+    cmd_vel_type: geometry_msgs/msg/Twist
+    frame_prefix_from_namespace: true
+    odom_frame: "{prefix}odom"
+    base_frame: "{prefix}base_footprint"
+    laser_frame: "{prefix}rplidar_link"
+    map_id: gazebo_test_room
+    bringup_launch: sim/gazebo/pinky1.launch.py
+    nav_launch: sim/gazebo/nav2.launch.py
+    mapping_launch: null
+    lidar_serial_port: null
+    motor_serial_port: null
+  hardware:
+    ros_domain_id: null
+    use_sim_time: false
+    cmd_vel_type: geometry_msgs/msg/Twist
+    frame_prefix_from_namespace: false
+    odom_frame: odom
+    base_frame: base_footprint
+    laser_frame: rplidar_link
+    map_id: null
+    bringup_launch: pinky_bringup/launch/bringup_robot.launch.xml
+    nav_launch: pinky_navigation/launch/bringup_launch.xml
+    mapping_launch: pinky_navigation/launch/map_building.launch.xml
+    lidar_serial_port: /dev/ttyAMA0
+    motor_serial_port: /dev/ttyAMA4
+    motor_baud: 1000000
+    motor_ids: [1, 2]
+    wheel_radius_m: 0.027
+    wheel_separation_m: 0.0961
+    battery_percent_topic: battery/percent
+    battery_voltage_topic: battery/voltage
+    battery_low_voltage: 6.8
+    hardware_motion_approved: false
