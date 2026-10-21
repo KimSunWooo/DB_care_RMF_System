@@ -1,0 +1,8 @@
+{
+  "fleet_name": "care_move",
+  "robots": [
+    {"id": "pinky1", "label": "Pinky #1", "initial_waypoint": "N_DOCK1", "battery": 95},
+    {"id": "pinky2", "label": "Pinky #2", "initial_waypoint": "N_DOCK2", "battery": 87},
+    {"id": "pinky3", "label": "Pinky #3", "initial_waypoint": "N_DOCK3", "battery": 91}
+  ]
+}

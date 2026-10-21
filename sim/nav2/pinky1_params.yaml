@@ -1,0 +1,34 @@
+# Prepared for a future virtual pinky1. Not verified against a live scan.
+# cmd_vel matches the Pinky Nav2 config and the Isaac Sim 6 Twist subscriber:
+# geometry_msgs/msg/Twist, enable_stamped_cmd_vel false.
+bt_navigator:
+  ros__parameters:
+    use_sim_time: true
+    global_frame: map
+    robot_base_frame: base_footprint
+    odom_topic: odom
+    enable_stamped_cmd_vel: false
+controller_server:
+  ros__parameters:
+    use_sim_time: true
+    controller_frequency: 10.0
+    odom_topic: odom
+    enable_stamped_cmd_vel: false
+    publish_zero_velocity: true
+    FollowPath:
+      plugin: nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController
+      desired_linear_vel: 0.15
+      max_linear_accel: 0.2
+      max_angular_accel: 0.4
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      use_sim_time: true
+      robot_radius: 0.12
+      resolution: 0.05
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      use_sim_time: true
+      robot_radius: 0.12
+      resolution: 0.05

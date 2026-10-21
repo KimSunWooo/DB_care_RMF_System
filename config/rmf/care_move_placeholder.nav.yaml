@@ -1,0 +1,12 @@
+# PLACEHOLDER GRAPH.
+# N_DOCK1 is at (0 m, 0 m) and N_ROOM102 is 5 m east on level L1.
+# These meters are a parser fixture. They are not taken from the dashboard image
+# and they are not a surveyed Nav2 or Isaac Sim map. Do not send goals with this file.
+levels:
+  L1:
+    vertices:
+      - [0.0, 0.0, {name: N_DOCK1, is_charger: true, is_parking_spot: true}]
+      - [5.0, 0.0, {name: N_ROOM102}]
+    lanes:
+      - [0, 1, {speed_limit: 0.0}]
+      - [1, 0, {speed_limit: 0.0}]

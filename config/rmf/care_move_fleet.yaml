@@ -1,0 +1,67 @@
+# care_move fleet. Only pinky1 is listed under rmf_fleet.robots.
+# pinky2 and pinky3 stay disabled in care_move.robots until a later phase.
+# Motion stays off until the navigation graph is surveyed against a Nav2 map.
+rmf_fleet:
+  name: care_move
+  limits:
+    linear: [0.4, 0.3]
+    angular: [0.5, 0.8]
+  profile:
+    footprint: 0.5
+    vicinity: 0.8
+  reversible: true
+  battery_system:
+    voltage: 24.0
+    capacity: 20.0
+    charging_current: 5.0
+  mechanical_system:
+    mass: 80.0
+    moment_of_inertia: 15.0
+    friction_coefficient: 0.3
+  ambient_system:
+    power: 30.0
+  tool_system:
+    power: 0.0
+  recharge_threshold: 0.2
+  recharge_soc: 1.0
+  publish_fleet_state: 2.0
+  account_for_battery_drain: true
+  retreat_to_charger_interval: 10.0
+  max_delay: 10.0
+  finishing_request: nothing
+  task_capabilities:
+    loop: true
+    delivery: false
+  robots:
+    pinky1:
+      charger: N_DOCK1
+      responsive_wait: false
+
+care_move:
+  graph_alignment: placeholder
+  allow_motion: false
+  simulation_confirmed: false
+  server_uri: ws://127.0.0.1:8000/_internal
+  map_name: L1
+  pose_timeout_sec: 2.0
+  goal_timeout_sec: 120.0
+  nav_graph: config/rmf/care_move_placeholder.nav.yaml
+  robots:
+    pinky1:
+      enabled: true
+      ros_namespace: pinky1
+      navigate_action: navigate_to_pose
+      pose_topic: amcl_pose
+      initial_waypoint: N_DOCK1
+    pinky2:
+      enabled: false
+      ros_namespace: pinky2
+      navigate_action: navigate_to_pose
+      pose_topic: amcl_pose
+      initial_waypoint: N_DOCK2
+    pinky3:
+      enabled: false
+      ros_namespace: pinky3
+      navigate_action: navigate_to_pose
+      pose_topic: amcl_pose
+      initial_waypoint: N_DOCK3

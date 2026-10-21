@@ -1,0 +1,22 @@
+{
+  "note": "CONCEPT MAP ONLY: normalized UI positions, NOT measured SLAM coordinates or an RMF navigation graph. Replace with validated 1F/7F waypoint names and map transforms before live use.",
+  "waypoints": [
+    {"name":"N_DOCK1", "label":"도킹 1", "floor":"1F", "x":70,"y":85},
+    {"name":"N_DOCK2", "label":"도킹 2", "floor":"1F", "x":81,"y":85},
+    {"name":"N_DOCK3", "label":"도킹 3", "floor":"1F", "x":91,"y":85},
+    {"name":"N_ROOM102", "label":"102호", "floor":"1F", "x":22,"y":30},
+    {"name":"N_ROOM103", "label":"103호", "floor":"1F", "x":22,"y":49},
+    {"name":"N_ROOM104", "label":"104호", "floor":"1F", "x":22,"y":68},
+    {"name":"N_WC1", "label":"1F 화장실", "floor":"1F", "x":15,"y":10},
+    {"name":"N_WC_WAIT", "label":"화장실 대기", "floor":"1F", "x":40,"y":20},
+    {"name":"N_EV1", "label":"1F 승강장", "floor":"1F", "x":49,"y":13},
+    {"name":"N_PT", "label":"물리치료실", "floor":"1F", "x":85,"y":12},
+    {"name":"N_GARDEN", "label":"정원", "floor":"1F", "x":28,"y":90},
+    {"name":"N_EV7", "label":"7F 승강장", "floor":"7F", "x":49,"y":13},
+    {"name":"N_WC7", "label":"7F 화장실", "floor":"7F", "x":15,"y":12},
+    {"name":"N_CAFE", "label":"식당", "floor":"7F", "x":23,"y":46},
+    {"name":"N_CHAPEL", "label":"예배당", "floor":"7F", "x":80,"y":20},
+    {"name":"N_MULTI", "label":"다목적실", "floor":"7F", "x":82,"y":53},
+    {"name":"N_GYM", "label":"운동보조실", "floor":"7F", "x":49,"y":88}
+  ]
+}
