@@ -1,0 +1,26 @@
+# Software limits for the odometry safety layer.
+# These are not measured motor parameters and they do not program a Dynamixel register.
+# bus_watchdog_register stays empty until the servo model is identified.
+mock_domain_id: 90
+occupied_domains: [0, 24, 25, 42, 53]
+command_timeout_sec: 0.5
+feedback_timeout_sec: 0.5
+max_linear_m_s: 0.25
+max_angular_rad_s: 1.0
+max_linear_accel_m_s2: 0.4
+max_angular_accel_rad_s2: 1.5
+# Tick acceptance is computed from speed, dt, and encoder_margin.
+# A fixed 2048-tick window is not used.
+encoder_margin: 1.5
+nominal_period_sec: 0.0333333333
+max_feedback_dt_sec: 0.1
+max_clock_step_sec: 1.0
+ticks_per_rev: 4096
+right_raw_sign: -1
+wheel_radius_m: 0.027
+wheel_radius_source: bringup_parameter_unverified
+wheel_separation_m: 0.0961
+wheel_separation_source: bringup_parameter_unverified
+urdf_joints: [l_wheel_joint, r_wheel_joint]
+driver_joints: [left_wheel_joint, right_wheel_joint]
+bus_watchdog_register: null

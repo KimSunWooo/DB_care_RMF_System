@@ -1,0 +1,11 @@
+# Coordinates are the Gazebo world and the pinky1_room map frame.
+# GZ_SPAWN is the spawn pose. GZ_EAST is the Nav2 goal that finished at about 1.0 m.
+# The operational L1 graph is a different file and is not changed here.
+levels:
+  gazebo_test_room:
+    vertices:
+      - [0.0, 0.0, {name: GZ_SPAWN, is_charger: true, is_parking_spot: true}]
+      - [1.2, 0.0, {name: GZ_EAST}]
+    lanes:
+      - [0, 1, {speed_limit: 0.2}]
+      - [1, 0, {speed_limit: 0.2}]

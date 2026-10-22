@@ -1,0 +1,70 @@
+# Gazebo test-room fleet. This is not the operational care_move fleet.
+# allow_motion stays false so the operational gate still refuses this file.
+# A gazebo dispatch also needs a live domain, Nav2, and pose check.
+rmf_fleet:
+  name: gazebo_pinky1
+  limits:
+    linear: [0.2, 0.2]
+    angular: [0.5, 0.5]
+  profile:
+    footprint: 0.3
+    vicinity: 0.5
+  reversible: true
+  battery_system:
+    voltage: 12.0
+    capacity: 10.0
+    charging_current: 2.0
+  mechanical_system:
+    mass: 5.0
+    moment_of_inertia: 0.2
+    friction_coefficient: 0.3
+  ambient_system:
+    power: 10.0
+  tool_system:
+    power: 0.0
+  recharge_threshold: 0.1
+  recharge_soc: 1.0
+  publish_fleet_state: 2.0
+  account_for_battery_drain: false
+  retreat_to_charger_interval: 600.0
+  max_delay: 10.0
+  finishing_request: nothing
+  task_capabilities:
+    loop: true
+    delivery: false
+  robots:
+    pinky1:
+      charger: GZ_SPAWN
+      responsive_wait: false
+
+care_move:
+  graph_alignment: surveyed
+  allow_motion: false
+  simulation_confirmed: false
+  server_uri: ws://127.0.0.1:9/unused
+  map_name: gazebo_test_room
+  pose_timeout_sec: 2.0
+  goal_timeout_sec: 180.0
+  nav_graph: config/rmf/gazebo_test_room/nav.yaml
+  robots:
+    pinky1:
+      enabled: true
+      ros_namespace: pinky1
+      navigate_action: navigate_to_pose
+      pose_topic: amcl_pose
+      initial_waypoint: GZ_SPAWN
+
+sim_session:
+  enabled: true
+  fleet_name: gazebo_pinky1
+  robot_id: pinky1
+  backend: gazebo
+  rmf_domain_id: 77
+  nav_domain_id: 42
+  graph_id: gazebo_test_room
+  clearance_m: 0.15
+  transform:
+    tx: 0.0
+    ty: 0.0
+    yaw: 0.0
+    scale: 1.0
