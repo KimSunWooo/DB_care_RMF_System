@@ -12,6 +12,7 @@ from fleet_adapter.sim_gateway import (
     serve_line,
     write_json_line,
 )
+from fleet_adapter.live_nav import ABORTED, CANCELED, SUCCEEDED, GoalTracker
 from fleet_adapter.sim_graph import dispatch_block, load_sim_session
 from fleet_adapter.tf_frames import frame_collisions, frame_ids
 from robot_profile.calibration import CHOSEN_CORRECTION, calibration_status
@@ -171,3 +172,17 @@ def test_gateway_socket_refuses_a_hardware_hello():
     assert b"refuse" in reply
     with pytest.raises(GraphError):
         load_sim_session(ROOT).nav_pose("floor_7")
+
+
+def test_live_goal_tracker_ignores_a_stale_result():
+    tracker = GoalTracker()
+    first = tracker.begin()
+    assert tracker.accept(first, "goal-a")
+    assert tracker.request_cancel(first)
+    assert tracker.observe_status(first, CANCELED) == "canceled"
+    second = tracker.begin()
+    assert tracker.accept(second, "goal-b")
+    assert tracker.observe_status(first, SUCCEEDED) == "stale"
+    assert tracker.phase == "accepted"
+    assert tracker.observe_status(second, ABORTED) == "aborted"
+    assert tracker.begin() is not None

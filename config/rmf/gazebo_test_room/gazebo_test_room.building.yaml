@@ -1,0 +1,14 @@
+name: gazebo_test_room
+coordinate_system: cartesian_meters
+levels:
+  gazebo_test_room:
+    elevation: 0
+    vertices:
+      - [0.0, 0.0, 0.0, GZ_SPAWN, {is_charger: [4, true], is_parking_spot: [4, true]}]
+      - [1.2, 0.0, 0.0, GZ_EAST, {}]
+    lanes:
+      - [0, 1, {graph_idx: [2, 0], speed_limit: [3, 0.2]}]
+      - [1, 0, {graph_idx: [2, 0], speed_limit: [3, 0.2]}]
+    walls: []
+    doors: []
+    measurements: []

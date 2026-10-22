@@ -121,7 +121,8 @@ class ElevatorRequest(BaseModel):
 
 
 def check_waypoints(places: list[str]):
-    bad = [place for place in places if place not in WAYPOINTS]
+    graph = set(RMF_STATUS.get("graph_waypoints") or []) if MODE == "rmf" else set()
+    bad = [place for place in places if place not in WAYPOINTS and place not in graph]
     if bad:
         raise HTTPException(400, f"Unknown waypoint(s): {', '.join(bad)}")
 
@@ -411,6 +412,8 @@ def record_submission(req: TaskRequest, result: dict) -> dict:
 
 @app.post("/api/tasks", status_code=202)
 async def create_task(req: TaskRequest):
+    if MODE == "rmf" and RMF_STATUS.get("status") in {None, "not_checked"}:
+        await refresh_rmf_observation(apply_robots=True)
     check_waypoints(req.places)
     if req.robot_id is not None and req.robot_id not in ROBOTS:
         raise HTTPException(404, "Unknown robot")
@@ -432,8 +435,6 @@ async def create_task(req: TaskRequest):
         robot["task_id"] = task_id
         RUNNING[task_id] = asyncio.create_task(simulate_task(task_id))
         return task
-    if RMF_STATUS.get("status") == "not_checked":
-        await refresh_rmf_observation(apply_robots=True)
     reason = dispatch_block_reason(req.robot_id, req.places)
     if reason:
         raise HTTPException(409, reason)
