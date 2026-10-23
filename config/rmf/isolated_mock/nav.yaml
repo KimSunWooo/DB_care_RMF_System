@@ -1,0 +1,9 @@
+# Isolated mock graph. Not a facility map and not the physical odometry trial.
+levels:
+  isolated_room:
+    vertices:
+      - [0.0, 0.0, {name: MOCK_HOME, is_charger: true, is_parking_spot: true}]
+      - [1.0, 0.0, {name: MOCK_EAST}]
+    lanes:
+      - [0, 1, {speed_limit: 0.2}]
+      - [1, 0, {speed_limit: 0.2}]

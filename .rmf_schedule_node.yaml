@@ -13,3 +13,48 @@
       shape_context:
         - 0.29999999999999999
         - 0.5
+- operation: Add
+  participant_description:
+    name: real_pinky1
+    group: physical_pinky
+    responsiveness: Responsive
+    profile:
+      footprint:
+        type: Circle
+        index: 0
+      vicinity:
+        type: Circle
+        index: 1
+      shape_context:
+        - 0.17999999999999999
+        - 0.25
+- operation: Add
+  participant_description:
+    name: mock_pinky1
+    group: isolated_mock
+    responsiveness: Responsive
+    profile:
+      footprint:
+        type: Circle
+        index: 0
+      vicinity:
+        type: Circle
+        index: 1
+      shape_context:
+        - 0.29999999999999999
+        - 0.5
+- operation: Add
+  participant_description:
+    name: mock_pinky2
+    group: isolated_mock
+    responsiveness: Responsive
+    profile:
+      footprint:
+        type: Circle
+        index: 0
+      vicinity:
+        type: Circle
+        index: 1
+      shape_context:
+        - 0.29999999999999999
+        - 0.5

@@ -7,8 +7,8 @@ Nav2 Goal은 보내지 않았다. Gazebo의 `(1.2, 0)`도 보내지 않았다.
 | 항목 | 결과 |
 |---|---|
 | `/scan` | PASS. `/sllidar_node`, 약 10 Hz |
-| `/odom` | NOT_TESTED. 토픽 없음 |
-| `odom` → `base_footprint` | NOT_TESTED |
+| `/odom` | PASS. Torque OFF 4초 동안 swPC 수신, x=0, y=0, twist 0. 발행 프로세스는 종료됨 |
+| `odom` → `base_footprint` | PASS. `/tf` stamp 1792659111, x=0, y=0 |
 | `base_footprint` → `base_link` | PASS. `/tf_static` |
 | 지도, AMCL, `map` → `odom` | NOT_TESTED |
 | NavigateToPose | NOT_TESTED. Action 서버 없음 |

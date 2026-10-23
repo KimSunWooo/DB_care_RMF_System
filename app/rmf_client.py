@@ -7,11 +7,21 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 import time
 from datetime import datetime, timezone
 from typing import Any
+from urllib.parse import quote
 
 import httpx
+
+logger = logging.getLogger("care_move.task")
+if not logger.handlers:
+    _handler = logging.StreamHandler()
+    _handler.setFormatter(logging.Formatter("%(message)s"))
+    logger.addHandler(_handler)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
 
 from app.rmf_token import TokenUnavailable
 
@@ -69,6 +79,47 @@ def jwt_expiry(token: str) -> dict:
     return result
 
 
+def booking_ids_for_label(states: Any, label: str) -> list[str]:
+    """Booking ids whose labels contain this Care-Move request label. Order is preserved."""
+    if not isinstance(states, list) or not label:
+        return []
+    found: list[str] = []
+    for state in states:
+        if not isinstance(state, dict):
+            continue
+        booking = state.get("booking")
+        if not isinstance(booking, dict):
+            continue
+        labels = booking.get("labels") or []
+        booking_id = booking.get("id")
+        if label in labels and isinstance(booking_id, str) and booking_id:
+            found.append(booking_id)
+    return found
+
+
+def state_for_label(states: Any, label: str) -> dict | None:
+    """The single task state for a label. None when missing or ambiguous."""
+    if not isinstance(states, list):
+        return None
+    matches = []
+    for state in states:
+        if not isinstance(state, dict):
+            continue
+        booking = state.get("booking")
+        if isinstance(booking, dict) and label in (booking.get("labels") or []):
+            matches.append(state)
+    if len(matches) != 1:
+        return None
+    return matches[0]
+
+
+def log_task_event(event: str, **fields: Any) -> None:
+    """One JSON line. Callers must not pass tokens, secrets, or Authorization headers."""
+    payload = {"timestamp": datetime.now(timezone.utc).isoformat(), "event": event}
+    payload.update(fields)
+    logger.info("%s", json.dumps(payload, ensure_ascii=False, default=str))
+
+
 def _error_text(payload: Any) -> str:
     if isinstance(payload, dict):
         if payload.get("errors"):
@@ -87,10 +138,12 @@ def _error_text(payload: Any) -> str:
 
 class RmfClient:
     def __init__(self, base_url: str, token: str = "", timeout: float = 5.0,
-                 transport: httpx.BaseTransport | None = None, provider=None):
+                 transport: httpx.BaseTransport | None = None, provider=None,
+                 submit_timeout: float = 12.0):
         self.base_url = base_url.rstrip("/") if base_url else ""
         self.token = normalize_token(token)
         self.timeout = timeout
+        self.submit_timeout = submit_timeout
         self._transport = transport
         self.provider = provider
 
@@ -108,16 +161,19 @@ class RmfClient:
         return {"Authorization": f"Bearer {self.token}"}, None
 
     async def request(self, method: str, path: str, payload: dict | None = None,
-                      _auth_retry: bool = False) -> Any:
+                      _auth_retry: bool = False, timeout: float | None = None) -> Any:
         if not self.base_url:
             raise RmfClientError("not_configured", "RMF_API_URL is not set")
         headers, generation = await self._authorization()
+        limit = self.timeout if timeout is None else timeout
+        # A single float in httpx applies to connect, read, write, and pool together.
+        phases = httpx.Timeout(connect=min(2.0, limit), read=limit, write=min(5.0, limit), pool=min(5.0, limit))
         try:
-            async with httpx.AsyncClient(base_url=self.base_url, timeout=self.timeout,
+            async with httpx.AsyncClient(base_url=self.base_url, timeout=phases,
                                           transport=self._transport, headers=headers) as client:
                 response = await client.request(method, path, json=payload)
         except httpx.TimeoutException as ex:
-            raise RmfClientError("timeout", f"RMF API timed out: {ex}") from ex
+            raise RmfClientError("timeout", f"RMF API timed out: {type(ex).__name__}") from ex
         except httpx.ConnectError as ex:
             raise RmfClientError("unreachable", f"RMF API unreachable: {ex}") from ex
         except httpx.RequestError as ex:
@@ -155,8 +211,31 @@ class RmfClient:
     async def get_json(self, path: str) -> Any:
         return await self.request("GET", path)
 
-    async def post_json(self, path: str, payload: dict) -> Any:
-        return await self.request("POST", path, payload)
+    async def post_json(self, path: str, payload: dict, timeout: float | None = None) -> Any:
+        return await self.request("POST", path, payload, timeout=timeout)
+
+    async def recover_submission(self, correlation_id: str) -> dict | None:
+        """One GET by requester label. Does not POST again."""
+        label = f"care-move-request={correlation_id}"
+        requester = quote(f"care-move:{correlation_id}", safe="")
+        try:
+            states = await self.get_json(f"/tasks?requester={requester}")
+        except RmfClientError as ex:
+            log_task_event("RMF_TASK_BOOKING_OBSERVED", correlation_id=correlation_id,
+                           error_kind=ex.kind, match_count=0, task_status="SUBMISSION_UNKNOWN")
+            return None
+        state = state_for_label(states, label)
+        if state is None:
+            log_task_event("RMF_TASK_BOOKING_OBSERVED", correlation_id=correlation_id,
+                           match_count=len(booking_ids_for_label(states, label)),
+                           task_status="SUBMISSION_UNKNOWN")
+            return None
+        booking = state.get("booking") if isinstance(state, dict) else None
+        booking_id = booking.get("id") if isinstance(booking, dict) else None
+        log_task_event("RMF_TASK_BOOKING_OBSERVED", correlation_id=correlation_id,
+                       rmf_booking_id=booking_id, task_status=state.get("status"),
+                       match_count=1)
+        return {"success": True, "state": state}
 
     async def cancel_task(self, task_id: str) -> Any:
         return await self.post_json("/tasks/cancel_task", {

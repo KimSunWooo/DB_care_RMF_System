@@ -80,10 +80,10 @@ URDF joint는 `${namespace}l_wheel_joint`, `${namespace}r_wheel_joint`이다. br
 
 ## D. 코드 변경
 
-- 추가: `hardware_safety/real_driver.py`, `fleet_adapter/real_gate.py`, `tests/test_real_pinky_driver.py`
+- 추가: `hardware_safety/xl330_bus.py`, `scripts/real_pinky_odom_once.py`. `real_driver.py`는 전원 차단을 관찰하기 전에는 arm하지 않는다
 - Pinky 원본, Mock `OdomSession`, Gazebo fleet adapter는 수정하지 않음
-- 실기체 게이트는 운용자 정지 승인이 없으면 torque와 goal velocity를 쓰지 않음
-- `pytest -q` 102 passed
+- 2026-10-22 Torque OFF 발행: 60샘플, 이동 0.0 m, Operating Mode 1, 서보 입력 5.0V, 버스 쓰기 0회. swPC가 `/odom`과 `odom` → `base_footprint`를 수신
+- `pytest -q` 103 passed
 - 상태 표는 `docs/CARE_MOVE_IMPLEMENTATION_STATUS.md`
 
 ## E. 다음 단계
@@ -94,7 +94,7 @@ URDF joint는 `${namespace}l_wheel_joint`, `${namespace}r_wheel_joint`이다. br
 
 1. 모델 1200, Torque 0, Encoder 정지는 확인했다.
 2. 주행 전에 `/cmd_vel` 0.3–0.5초 미수신 시 Goal Velocity 0 쓰기가 성공하는지 따로 검증한다. Bus Watchdog은 Encoder READ와 분리해서 본다.
-3. 물리 정지 수단이 확인된 뒤에만 Torque를 켠다.
+3. 운용자의 가드·전원 스위치 확인은 기록했다. 전원을 끊어 구동부가 꺼지는 것을 관찰한 뒤에만 Torque를 켠다.
 4. `/cmd_vel` 0.3–0.5초 timeout이 실제 모터 정지까지 확인되고, 물리 정지 수단이 확인된 뒤에만 바퀴를 띄운 짧은 회전을 한다.
 5. 그 다음 0.03 m/s, 0.05 m, 5초 제한의 지면 주행을 한 번만 한다.
 6. 실기체 지도, `map` → `odom`, AMCL, NavigateToPose 서버가 있을 때만 Nav2 goal을 검토한다. Gazebo의 `(1.2, 0)`은 사용하지 않는다.

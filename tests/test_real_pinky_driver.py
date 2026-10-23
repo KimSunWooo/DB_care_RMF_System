@@ -56,15 +56,12 @@ def test_observed_xl330_identity_stays_disarmed_and_stopped():
 
 def test_joint_names_match_urdf_and_skip_the_existing_publisher():
     driver = _driver(_pair())
-    driver.operator_stop_approved = True
     assert driver.identify() is None
-    assert driver.arm({"joint_state_publisher"}) is None
-    assert driver.publishes_wheel_joints is False
+    assert driver.use_joint_topic({"joint_state_publisher"}) is False
     assert driver.joint_state() is None
     alone = _driver(_pair())
-    alone.operator_stop_approved = True
     assert alone.identify() is None
-    assert alone.arm(set()) is None
+    assert alone.use_joint_topic(set()) is True
     state = alone.joint_state()
     assert state["name"] == ["l_wheel_joint", "r_wheel_joint"]
     assert state["position"][0] > 0
@@ -99,10 +96,26 @@ def test_bad_model_torque_and_encoder_step_do_not_enable_motion():
     assert jump.push_command(0.03, 0.0, 0.2) is False
 
 
+def _ready(samples: list[ServoSample], **transport) -> RealPinkyDriver:
+    driver = _driver([_sample(item.servo_id, item.position, operating_mode=1) for item in samples], **transport)
+    driver.operator_stop_approved = True
+    driver.power_cut_observed = True
+    return driver
+
+
+def test_operator_statement_does_not_replace_an_observed_power_cut():
+    driver = _driver(_pair(operating_mode=1))
+    driver.operator_stop_approved = True
+    assert driver.identify() is None
+    assert driver.arm(set()) == "power cut has not been observed"
+    assert driver.enable_torque()
+    assert driver.transport.torque_writes == []
+    assert driver.transport.velocity_writes == []
+
+
 def test_ros_watchdog_stops_and_latches_when_the_stop_write_fails():
     samples = _pair()
-    driver = _driver(samples, motion_enabled=True)
-    driver.operator_stop_approved = True
+    driver = _ready(samples, motion_enabled=True)
     assert driver.identify() is None
     assert driver.arm(set()) is None
     assert driver.enable_torque() is None
@@ -118,8 +131,7 @@ def test_ros_watchdog_stops_and_latches_when_the_stop_write_fails():
     assert driver.state == "identified"
     assert driver.start_trial(1.0, 0.05, 5.0) is not None
 
-    failed = _driver(samples, motion_enabled=True, stop_ok=False)
-    failed.operator_stop_approved = True
+    failed = _ready(samples, motion_enabled=True, stop_ok=False)
     assert failed.identify() is None
     assert failed.arm(set()) is None
     assert failed.enable_torque() is None
@@ -132,8 +144,7 @@ def test_ros_watchdog_stops_and_latches_when_the_stop_write_fails():
 
 
 def test_feedback_loss_does_not_restart_the_trial():
-    driver = _driver(_pair(), motion_enabled=True)
-    driver.operator_stop_approved = True
+    driver = _ready(_pair(), motion_enabled=True)
     assert driver.identify() is None
     assert driver.arm(set()) is None
     assert driver.enable_torque() is None
@@ -146,8 +157,7 @@ def test_feedback_loss_does_not_restart_the_trial():
 
 
 def test_speed_cap_and_unapproved_trial_send_nothing():
-    driver = _driver(_pair(), motion_enabled=True)
-    driver.operator_stop_approved = True
+    driver = _ready(_pair(), motion_enabled=True)
     assert driver.identify() is None
     assert driver.arm(set()) is None
     assert driver.enable_torque() is None

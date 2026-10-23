@@ -1,0 +1,56 @@
+# Mock fleet for the isolated RMF environment. It never publishes cmd_vel.
+rmf_fleet:
+  name: isolated_mock
+  limits:
+    linear: [0.2, 0.2]
+    angular: [0.5, 0.5]
+  profile:
+    footprint: 0.3
+    vicinity: 0.5
+  reversible: true
+  battery_system:
+    voltage: 12.0
+    capacity: 10.0
+    charging_current: 2.0
+  mechanical_system:
+    mass: 5.0
+    moment_of_inertia: 0.2
+    friction_coefficient: 0.3
+  ambient_system:
+    power: 10.0
+  tool_system:
+    power: 0.0
+  recharge_threshold: 0.1
+  recharge_soc: 1.0
+  publish_fleet_state: 1.0
+  account_for_battery_drain: false
+  retreat_to_charger_interval: 600.0
+  max_delay: 10.0
+  finishing_request: nothing
+  task_capabilities:
+    loop: true
+    delivery: false
+  robots:
+    mock_pinky1:
+      charger: MOCK_HOME
+      responsive_wait: false
+    mock_pinky2:
+      charger: MOCK_HOME
+      responsive_wait: false
+    mock_pinky3:
+      charger: MOCK_HOME
+      responsive_wait: false
+
+care_move:
+  graph_alignment: mock
+  allow_motion: false
+  simulation_confirmed: false
+  server_uri: ws://127.0.0.1:8001/_internal
+  map_name: isolated_room
+  robots:
+    mock_pinky1:
+      enabled: true
+    mock_pinky2:
+      enabled: true
+    mock_pinky3:
+      enabled: true

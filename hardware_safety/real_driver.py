@@ -31,6 +31,7 @@ class ServoSample:
     bus_watchdog: int
     position: int
     velocity: int
+    operating_mode: int = -1
 
 
 class RealTransport:
@@ -90,6 +91,7 @@ class RealPinkyDriver:
     transport: RealTransport
     config: SafetyConfig
     operator_stop_approved: bool = False
+    power_cut_observed: bool = False
     state: str = "idle"
     reason: str = ""
     torque_enabled: bool = False
@@ -142,6 +144,11 @@ class RealPinkyDriver:
         self._ingest(self.samples, 0.0)
         return None
 
+    def rebase_clock(self, now: float) -> None:
+        """Move the seeded feedback stamp onto the caller's clock. No pose change."""
+        if self.odom is not None and self.odom.last_feedback_at is not None:
+            self.odom.last_feedback_at = now
+
     def arm(self, other_joint_publishers: set[str]) -> str | None:
         if self.state != "identified":
             self.reason = "identify has not passed"
@@ -149,14 +156,25 @@ class RealPinkyDriver:
         if not self.operator_stop_approved:
             self.reason = "operator has not confirmed an independent stop"
             return self.reason
+        if not self.power_cut_observed:
+            self.reason = "power cut has not been observed"
+            return self.reason
+        if any(sample.operating_mode != 1 for sample in self.samples):
+            self.reason = "operating mode is not velocity mode 1"
+            return self.reason
         self.publishes_wheel_joints = "joint_state_publisher" not in other_joint_publishers
         self.state = "armed"
         self.reason = ""
         return None
 
+    def use_joint_topic(self, other_joint_publishers: set[str]) -> bool:
+        """Publish wheel joints only when this process is the only source."""
+        self.publishes_wheel_joints = "joint_state_publisher" not in other_joint_publishers
+        return self.publishes_wheel_joints
+
     def enable_torque(self) -> str | None:
-        if self.state != "armed" or not self.operator_stop_approved:
-            self.reason = "torque stays off without arm and operator approval"
+        if self.state != "armed" or not self.operator_stop_approved or not self.power_cut_observed:
+            self.reason = "torque stays off without arm, operator approval, and an observed power cut"
             return self.reason
         if not self.transport.write_torque(1):
             self.torque_enabled = False
